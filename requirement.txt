@@ -1,0 +1,6 @@
+pip install streamlit
+pip install python-dotenv
+pip install openai
+pip install streamlit-chat
+pip install streamlit
+pip install st-annotated-text
