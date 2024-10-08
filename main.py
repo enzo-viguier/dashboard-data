@@ -1,5 +1,7 @@
 import os
 import time
+
+import pandas as pd
 import streamlit as st
 from dotenv import load_dotenv
 from openai import OpenAI
@@ -30,6 +32,9 @@ def stream_data(text_to_display):
 def is_txt_file(file):
     return file.name.endswith('.txt')
 
+def is_csv_file(file):
+    return file.name.endswith('.csv')
+
 # Titre de l'application
 st.markdown("<h1 style='text-align: center;'>Groupe 2 - Data</h1>", unsafe_allow_html=True)
 
@@ -51,10 +56,10 @@ if summary_upload is not None:
         if st.button("Générer le résumé de l'article"):
 
             # Commenter / Décommenter si on souhaite utiliser l'API OpenAI
-            summary = summarize_article(summary_text)
+            # summary = summarize_article(summary_text)
 
             # Simuler un résumé
-            #summary = "le 15 janvier 2024 la NASA a découvert une nouvelle exoplanète possible habitable, nommée Kepler-452c, située à 1400 années-lumière de la Terre."
+            summary = "le 15 janvier 2024 la NASA a découvert une nouvelle exoplanète possible habitable, nommée Kepler-452c, située à 1400 années-lumière de la Terre."
 
             st.subheader("Résumé :")
             # st.write(summary)
