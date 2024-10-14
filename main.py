@@ -26,7 +26,7 @@ def summarize_article(article_text):
     )
     return response.choices[0].message.content
 
-# Fonction qui permet de résumer un article avec des annotation donné en paramètre
+# Fonction qui permet de résumer un article avec des annotation avec un texte donné en paramètre
 def summarize_to_at(article_text):
     response = client.chat.completions.create(
         model=model_name,
@@ -75,6 +75,9 @@ def process_at_file(content):
         st.error(f"Erreur lors du traitement du fichier : {e}")
         return []
 
+
+# --- Liste des fonctions de vérification de type de fichier --- #
+
 def is_txt_file(file):
     return file.name.endswith('.txt')
 
@@ -86,7 +89,6 @@ def is_at_file(file):
 
 # Titre de l'application
 st.markdown("<h1 style='text-align: center;'>Groupe 2 - Data</h1>", unsafe_allow_html=True)
-
 
 ## SECTION RESUME D'ARTICLE
 
@@ -110,17 +112,9 @@ if summary_upload is not None:
             # Générer un résumé
             summary = summarize_article(summary_text)
 
-            # Simuler un résumé
-            #summary = "le 15 janvier 2024 la NASA a découvert une nouvelle exoplanète possible habitable, nommée Kepler-452c, située à 1400 années-lumière de la Terre."
-
-            st.subheader("Résumé :")
-            st.write_stream(stream_data(summary))
-
-
             # Résumer l'article avec des annotations
-            summary_at = summarize_to_at(summary)
-            summary_at = remove_trailing_period(summary_at)
-            print(summary_at)
+            summary_at = summarize_to_at(summary_text)
+            summary_at = remove_trailing_period(summary_at) # Supprimer le point final si présent
 
             # Convertir le résumé annoté en une liste de tuples
             try:
@@ -133,23 +127,15 @@ if summary_upload is not None:
             annotated_text(*summary_at_list)
 
             st.download_button(
-                label="Télécharger le résumé",
-                data=summary,
-                file_name="resume.txt",
-                mime="text/plain",
-                key="download_button"
-            )
-
-            st.download_button(
                 label="Télécharger le résumé au format .at",
                 data=summary_at,
                 file_name="resume.at",
                 mime="text/plain",
                 key="download_button_at"
             )
-
     else:
         st.error("Le fichier doit être au format txt.")
+
 
 # SECTION ANNOTATION
 
@@ -157,7 +143,6 @@ st.title("Annotation d'un résumé d'article")
 
 if summary is None:
 
-    # Variable .at file
     annotation_upload = st.file_uploader("Choisissez un fichier .at vous l'annotation du résumé", type="at", key="annotation_uploader")
 
     if annotation_upload is not None:
