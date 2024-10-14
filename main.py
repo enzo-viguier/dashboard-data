@@ -26,6 +26,36 @@ def summarize_article(article_text):
     )
     return response.choices[0].message.content
 
+# Fonction qui permet de résumer un article avec des annotation donné en paramètre
+def summarize_to_at(article_text):
+    response = client.chat.completions.create(
+        model=model_name,
+        messages=[
+            {"role": "system",
+             "content": "Vous êtes un assistant spécialisé dans le résumé d'articles de presse. Générez un résumé en une seule phrase avec les éléments Qui, Quand et Où mis en évidence selon le format spécifié."},
+            {"role": "user", "content": f"""Résumez cet article en une phrase contenant l'événement principal et ses informations clés. 
+            Utilisez le format suivant pour mettre en évidence les éléments Qui, Quand et Où :
+            ("texte", "Quand") pour la date/période
+            ("texte", "Qui") pour les acteurs principaux
+            ("texte", "Ou") pour le lieu
+
+            Exemple de format:
+            "Le", ("16 janvier 2024", "Quand"), ("les forces navales iraniennes et pakistanaises", "Qui"), " ont mené des exercices conjoints ", ("au large de Bandar Abbas, dans le détroit d'Ormuz", "Ou"), " visant à renforcer leur coopération militaire et à promouvoir les accords maritimes bilatéraux."
+            
+            Construis le résumé en commençant par des guillemets doubles, suivis du début de la phrase. Pour chaque élément clé (Quand, Qui, Où), insérez une virgule suivie d'un espace, puis ouvrez une parenthèse. À l'intérieur de cette parenthèse, placez d'abord le texte pertinent entre guillemets doubles, suivi d'une virgule et d'un espace, puis l'étiquette correspondante ('Quand', 'Qui', ou 'Ou') également entre guillemets doubles. Fermez la parenthèse. Continuez la phrase avec le texte non mis en évidence entre les éléments clés, en utilisant des virgules et des espaces pour séparer les différentes parties. Terminez la phrase avec un point à l'intérieur des guillemets doubles de fermeture. 
+            Le texte doit se terminer par un guillemet double fermant et pas de point final ou de virgule.
+            
+            Article à résumer : {article_text}"""}
+        ],
+        temperature=0.01  # Réduire la température pour des réponses plus cohérentes
+    )
+    return response.choices[0].message.content
+
+def remove_trailing_period(text):
+    if text.endswith('.'):
+        return text[:-1]
+    return text
+
 # Fonction qui permet d'afficher un message mot par mot
 def stream_data(text_to_display):
     for word in text_to_display.split():
@@ -77,16 +107,30 @@ if summary_upload is not None:
         # Résumer l'article
         if st.button("Générer le résumé de l'article"):
 
-            # Commenter / Décommenter si on souhaite utiliser l'API OpenAI
-            # summary = summarize_article(summary_text)
+            # Générer un résumé
+            summary = summarize_article(summary_text)
 
             # Simuler un résumé
-            summary = "le 15 janvier 2024 la NASA a découvert une nouvelle exoplanète possible habitable, nommée Kepler-452c, située à 1400 années-lumière de la Terre."
+            #summary = "le 15 janvier 2024 la NASA a découvert une nouvelle exoplanète possible habitable, nommée Kepler-452c, située à 1400 années-lumière de la Terre."
 
             st.subheader("Résumé :")
-            # st.write(summary)
             st.write_stream(stream_data(summary))
-            # message(summary)
+
+
+            # Résumer l'article avec des annotations
+            summary_at = summarize_to_at(summary)
+            summary_at = remove_trailing_period(summary_at)
+            print(summary_at)
+
+            # Convertir le résumé annoté en une liste de tuples
+            try:
+                summary_at_list = eval(summary_at)
+            except Exception as e:
+                st.error(f"Erreur lors de la conversion du résumé annoté : {e}")
+                summary_at_list = []
+
+            st.subheader("Résumé annoté :")
+            annotated_text(*summary_at_list)
 
             st.download_button(
                 label="Télécharger le résumé",
@@ -95,6 +139,15 @@ if summary_upload is not None:
                 mime="text/plain",
                 key="download_button"
             )
+
+            st.download_button(
+                label="Télécharger le résumé au format .at",
+                data=summary_at,
+                file_name="resume.at",
+                mime="text/plain",
+                key="download_button_at"
+            )
+
     else:
         st.error("Le fichier doit être au format txt.")
 
@@ -105,7 +158,7 @@ st.title("Annotation d'un résumé d'article")
 if summary is None:
 
     # Variable .at file
-    annotation_upload = st.file_uploader("Choisissez un fichier .at pour l'annotation", type="at", key="annotation_uploader")
+    annotation_upload = st.file_uploader("Choisissez un fichier .at vous l'annotation du résumé", type="at", key="annotation_uploader")
 
     if annotation_upload is not None:
 
