@@ -58,7 +58,11 @@ OPEN_AI_MODEL=
 
 Pour réaliser un modèle fine-tuné, vous pouvez utiliser le fichier `donnees_fine_tuning_chat.jsonl` et utiliser OpenAI pour entraîner un modèle sur ces données.
 
+Si vous souhaitez utiliser notre modèle fine-tuné, vous pouvez renseigné la variable `OPEN_AI_MODEL` dans le fichier `.env` avec la valeur `ft:gpt-3.5-turbo-0125:personal::AFeX2hYK`.
+Il est encouragé de fine-tuner le modèle sur vos propres données pour de potentiels meilleurs résultats.
 
 ### Conclusion
 
-Ce projet est un exemple d'utilisation de Streamlit et OpenAI pour générer des résumés d'articles de presse. Vous pouvez
+Ce projet permet de générer des résumés d'articles de presse de manière simple et efficace. 
+Il utilise un modèle fine-tuné avec OpenAI pour générer des résumés de qualité. 
+Les éléments clés sont mis en évidence pour une meilleure lisibilité et compréhension grâce à l'annotation des résumés sur l'interface web.
