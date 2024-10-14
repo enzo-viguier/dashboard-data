@@ -10,10 +10,12 @@ load_dotenv()
 # OPEN API
 api_key = os.getenv("OPEN_API_KEY")
 client = OpenAI(api_key=api_key)
-model_name = "ft:gpt-3.5-turbo-0125:personal::AFeX2hYK" # Model Finetuned
+#model_name = "ft:gpt-3.5-turbo-0125:personal::AFeX2hYK"  # Model Finetuned
+model_name = os.getenv("OPEN_AI_MODEL")
 
 # Global variable
 summary = None
+
 
 # Fonction qui permet de résumer un article donné en paramètre
 def summarize_article(article_text):
@@ -21,10 +23,12 @@ def summarize_article(article_text):
         model=model_name,
         messages=[
             {"role": "system", "content": "Vous êtes un assistant spécialisé dans le résumé d'articles de presse."},
-            {"role": "user", "content": f"Résumez cet article en une phrase contenant l'événement principal et ses informations clés (qui, quand, où) : {article_text}"}
+            {"role": "user",
+             "content": f"Résumez cet article en une phrase contenant l'événement principal et ses informations clés (qui, quand, où) : {article_text}"}
         ]
     )
     return response.choices[0].message.content
+
 
 # Fonction qui permet de résumer un article avec des annotation avec un texte donné en paramètre
 def summarize_to_at(article_text):
@@ -51,16 +55,19 @@ def summarize_to_at(article_text):
     )
     return response.choices[0].message.content
 
+
 def remove_trailing_period(text):
     if text.endswith('.'):
         return text[:-1]
     return text
+
 
 # Fonction qui permet d'afficher un message mot par mot
 def stream_data(text_to_display):
     for word in text_to_display.split():
         yield word + " "
         time.sleep(0.05)
+
 
 # Fonction permettant de traiter le contenu d'un fichier .at
 def process_at_file(content):
@@ -81,11 +88,14 @@ def process_at_file(content):
 def is_txt_file(file):
     return file.name.endswith('.txt')
 
+
 def is_csv_file(file):
     return file.name.endswith('.csv')
 
+
 def is_at_file(file):
     return file.name.endswith('.at')
+
 
 # Titre de l'application
 st.markdown("<h1 style='text-align: center;'>Groupe 2 - Data</h1>", unsafe_allow_html=True)
@@ -105,7 +115,6 @@ if summary_upload is not None:
         st.subheader("Contenu original :")
         st.text(summary_text)
 
-
         # Résumer l'article
         if st.button("Générer le résumé de l'article"):
 
@@ -114,7 +123,7 @@ if summary_upload is not None:
 
             # Résumer l'article avec des annotations
             summary_at = summarize_to_at(summary_text)
-            summary_at = remove_trailing_period(summary_at) # Supprimer le point final si présent
+            summary_at = remove_trailing_period(summary_at)  # Supprimer le point final si présent
 
             # Convertir le résumé annoté en une liste de tuples
             try:
@@ -122,6 +131,10 @@ if summary_upload is not None:
             except Exception as e:
                 st.error(f"Erreur lors de la conversion du résumé annoté : {e}")
                 summary_at_list = []
+
+            # Stocker le résumé annoté dans session_state pour persister après le téléchargement
+            st.session_state["summary_at_list"] = summary_at_list
+            st.session_state["summary_at"] = summary_at
 
             st.subheader("Résumé annoté :")
             annotated_text(*summary_at_list)
@@ -136,14 +149,14 @@ if summary_upload is not None:
     else:
         st.error("Le fichier doit être au format txt.")
 
-
 # SECTION ANNOTATION
 
 st.title("Annotation d'un résumé d'article")
 
 if summary is None:
 
-    annotation_upload = st.file_uploader("Choisissez un fichier .at vous l'annotation du résumé", type="at", key="annotation_uploader")
+    annotation_upload = st.file_uploader("Choisissez un fichier .at vous l'annotation du résumé", type="at",
+                                         key="annotation_uploader")
 
     if annotation_upload is not None:
 
