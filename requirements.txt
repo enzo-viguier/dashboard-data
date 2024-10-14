@@ -2,4 +2,3 @@ openai==1.51.1
 st-annotated-text==4.0.1
 streamlit==1.39.0
 python-dotenv==1.0.1
-
